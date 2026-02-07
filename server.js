@@ -1,11 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
+const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const messageRoutes = require('./routes/messages');
 
 const app = express();
+app.use(cors());
+
 const mongoURI = process.env.MONGO_URI;
 
 // Middleware

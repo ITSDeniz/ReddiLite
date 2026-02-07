@@ -13,5 +13,6 @@ router.post('/:id/vote', authenticateToken, messageController.voteMessage); // O
 // Yorum işlemleri
 router.get('/:id/comments', messageController.getComments); // Yorumları herkes görebilir
 router.post('/:id/comments', authenticateToken, messageController.addComment); // Yorum yapmak için giriş şart
+router.delete('/comments/:id', authenticateToken, messageController.deleteComment); // Yorum silme
 
 module.exports = router;
