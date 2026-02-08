@@ -4,6 +4,7 @@ function CreatePost({onPostCreated, currentUser}){
      const [title, setTitle] = useState('');
      const [text, setText] = useState('');
      const [community, setCommunity] = useState('');
+     const [imageURL, setImageURL] = useState('');
 
      if (!currentUser) return null;
 
@@ -19,13 +20,14 @@ function CreatePost({onPostCreated, currentUser}){
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ title, text, community: community || 'general' })
+                body: JSON.stringify({ title, text, imageURL, community: community || 'general' })
             });
             
             if(response.ok){
                 setTitle('');
                 setText('');
                 setCommunity('');
+                setImageURL('');
                 onPostCreated();
             } else if (response.status === 401 || response.status === 403) {
                 localStorage.removeItem('token');
@@ -57,6 +59,13 @@ function CreatePost({onPostCreated, currentUser}){
                   placeholder="Community (optional)"
                   value={community}
                   onChange={(e) => setCommunity(e.target.value)}
+                  style={styles.input} 
+                />
+                <input 
+                  type="text"
+                  placeholder="Image URL (optional)"
+                  value={imageURL}
+                  onChange={(e) => setImageURL(e.target.value)}
                   style={styles.input} 
                 />
                 <textarea 

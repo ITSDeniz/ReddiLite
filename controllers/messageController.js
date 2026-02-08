@@ -1,5 +1,6 @@
 const Message = require('../models/message');
 const Comment = require('../models/comment'); 
+const aiService = require('../services/aiService');
 
 exports.getMessages = async (req, res) => {
     try {
@@ -13,10 +14,24 @@ exports.getMessages = async (req, res) => {
 
 exports.createMessage = async (req, res) => {
     try {
+        const { title, text } = req.body;
+        let { community } = req.body;
+
+        // AI Community suggestion (optional, continues even if it fails)
+        if (!community || community === 'general') {
+            try {
+                const suggested = await aiService.suggestCommunity(title, text);
+                community = suggested || 'general';
+            } catch (e) {
+                community = 'general';
+            }
+        }
+
         const newMessage = new Message({
-            title: req.body.title, 
-            text: req.body.text,
-            community: req.body.community || 'general', 
+            title: title, 
+            text: text,
+            imageURL: req.body.imageURL || '', 
+            community: community, 
             author: req.user.username,
             userID: req.user.userID
         });
@@ -24,6 +39,18 @@ exports.createMessage = async (req, res) => {
         res.status(201).json(newMessage);
     } catch (err) {
         res.status(400).json({ error: "Failed to save message", details: err.message });
+    }
+};
+
+exports.summarizeMessage = async (req, res) => {
+    try {
+        const message = await Message.findById(req.params.id);
+        if (!message) return res.status(404).json({ error: "Post not found" });
+
+        const summary = await aiService.summarizeText(message.text);
+        res.json({ summary });
+    } catch (err) {
+        res.status(500).json({ error: "Summarization failed" });
     }
 };
 

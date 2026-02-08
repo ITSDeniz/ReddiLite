@@ -5,9 +5,30 @@ function PostCard({ post, onVote }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [shareText, setShareText] = useState('🔗 Share');
+  const [summary, setSummary] = useState('');
+  const [loadingSummary, setLoadingSummary] = useState(false);
   const token = localStorage.getItem('token');
 
   const score = (post.upvotes?.length || 0) - (post.downvotes?.length || 0);
+
+  const handleSummarize = async () => {
+    if (summary) {
+      setSummary(''); // Toggle off
+      return;
+    }
+    setLoadingSummary(true);
+    try {
+      const response = await fetch(`http://localhost:3000/api/messages/${post._id}/summarize`);
+      const data = await response.json();
+      setSummary(data.summary || 'Could not summarize this post.');
+    } catch (err) {
+      console.error("Error summarizing:", err);
+      setSummary('Error fetching summary.');
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
   const currentUserID = localStorage.getItem('userID');
   const isUpvoted = post.upvotes?.includes(currentUserID);
   const isDownvoted = post.downvotes?.includes(currentUserID);
@@ -116,6 +137,13 @@ function PostCard({ post, onVote }) {
     }
   };
 
+  const getAvatarColor = (name) => {
+    const colors = ['#FF4500', '#0079D3', '#FFD500', '#46D160', '#7193FF', '#FFB000'];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return colors[Math.abs(hash) % colors.length];
+  };
+
   return (
     <div className="post-card" style={styles.card}>
       <div className="vote-column" style={styles.voteSidebar}>
@@ -143,7 +171,21 @@ function PostCard({ post, onVote }) {
 
       <div className="content-column" style={styles.content}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="post-meta" style={{ fontSize: '12px', color: '#787c7e' }}>
+          <div className="post-meta" style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: '#787c7e', gap: '8px' }}>
+            <div style={{ 
+              width: '20px', 
+              height: '20px', 
+              borderRadius: '50%', 
+              backgroundColor: getAvatarColor(post.author || 'A'),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '10px',
+              fontWeight: 'bold'
+            }}>
+              {post.author?.[0].toUpperCase()}
+            </div>
             r/{post.community || 'general'} • Posted by u/{post.author}
           </div>
           {localStorage.getItem('userID') === post.userID && (
@@ -157,9 +199,27 @@ function PostCard({ post, onVote }) {
           )}
         </div>
         <div className="post-title" style={{ fontSize: '18px', fontWeight: '600', padding: '4px 0' }}>{post.title}</div>
+        
+        {post.imageURL && (
+          <div style={{ margin: '10px 0', borderRadius: '4px', overflow: 'hidden', border: '1px solid #eee' }}>
+            <img src={post.imageURL} alt="post" style={{ width: '100%', maxHeight: '512px', objectFit: 'contain', display: 'block' }} />
+          </div>
+        )}
+
         <div className="post-text" style={{ padding: '8px 0', fontSize: '14px' }}>{post.text}</div>
+        
+        {summary && (
+          <div className="ai-summary" style={styles.summaryBox}>
+            <small style={{ color: '#0079d3', fontWeight: 'bold' }}>✨ AI SUMMARY:</small>
+            <p style={{ margin: '4px 0', fontSize: '13px', fontStyle: 'italic' }}>{summary}</p>
+          </div>
+        )}
+
         <div className="post-footer" style={styles.actions}>
           <span onClick={toggleComments} style={{ cursor: 'pointer' }}>💬 {comments.length > 0 ? comments.length : ''} Comments</span>
+          <span onClick={handleSummarize} style={{ cursor: 'pointer', color: '#0079d3' }}>
+            {loadingSummary ? '⚡ Summarizing...' : (summary ? '❌ Hide Summary' : '✨ Summarize')}
+          </span>
           <span onClick={handleShare} style={{ cursor: 'pointer' }}>{shareText}</span>
         </div>
 
@@ -255,6 +315,14 @@ const styles = {
     color: '#878a8c',
     fontWeight: 'bold',
     marginTop: '10px'
+  },
+  summaryBox: {
+    backgroundColor: '#f6f7f8',
+    padding: '10px',
+    borderRadius: '4px',
+    borderLeft: '4px solid #0079d3',
+    marginTop: '8px',
+    marginBottom: '8px'
   },
   commentSection: {
     marginTop: '15px',
