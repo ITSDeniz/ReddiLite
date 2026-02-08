@@ -152,13 +152,16 @@ const styles = {
     zIndex: 1000
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.4)',
     padding: '40px',
-    borderRadius: '12px',
+    borderRadius: '24px',
     width: '100%',
     maxWidth: '400px',
     position: 'relative',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
   },
   closeBtn: {
     position: 'absolute',
@@ -229,7 +232,7 @@ const styles = {
   },
   userName: {
     fontSize: '14px',
-    color: '#1c1c1c'
+    color: 'var(--text-color)'
   },
   logoutBtn: {
     padding: '6px 20px',

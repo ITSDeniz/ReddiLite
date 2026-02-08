@@ -8,10 +8,21 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [currentUser, setCurrentUser] = useState(localStorage.getItem('username') || null);
   const [sortBy, setSortBy] = useState('new'); // 'new' or 'top'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
     fetchPosts();
   }, [sortBy]); // Refetch when sorting changes
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   const fetchPosts = async () => {
     try {
@@ -30,6 +41,12 @@ function App() {
     }
   };
 
+  const filteredPosts = posts.filter(post => 
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (post.community && post.community.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   const handleLogin = (username) => {
     setCurrentUser(username);
   };
@@ -37,6 +54,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('userID');
     setCurrentUser(null);
   };
 
@@ -80,14 +98,25 @@ function App() {
                 type="text" 
                 placeholder="🔍 Search ReddiLite" 
                 style={styles.searchInput}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
-          <Auth 
-            currentUser={currentUser} 
-            onLogin={handleLogin} 
-            onLogout={handleLogout} 
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div className="theme-switch-wrapper" onClick={toggleTheme} title="Toggle Dark/Light Mode">
+              <span className="theme-switch-label">🌙</span>
+              <div className="theme-switch-container">
+                <div className="theme-switch-ball"></div>
+              </div>
+              <span className="theme-switch-label">☀️</span>
+            </div>
+            <Auth 
+              currentUser={currentUser} 
+              onLogin={handleLogin} 
+              onLogout={handleLogout} 
+            />
+          </div>
         </div>
       </header>
       
@@ -95,12 +124,14 @@ function App() {
         <main className="feed" style={styles.feed}>
           <div className="sort-tabs" style={styles.sortTabs}>
             <button 
+              className="tab-btn"
               onClick={() => setSortBy('new')} 
               style={{...styles.tabBtn, color: sortBy === 'new' ? '#0079d3' : '#878a8c'}}
             >
               🆕 New
             </button>
             <button 
+              className="tab-btn"
               onClick={() => setSortBy('top')} 
               style={{...styles.tabBtn, color: sortBy === 'top' ? '#0079d3' : '#878a8c'}}
             >
@@ -110,10 +141,10 @@ function App() {
 
           <CreatePost onPostCreated={fetchPosts} currentUser={currentUser} /> 
           
-          {posts.length === 0 ? (
-            <p>No posts yet or backend is offline...</p>
+          {filteredPosts.length === 0 ? (
+            <p>No posts found for "{searchQuery}"</p>
           ) : (
-            posts.map(post => (
+            filteredPosts.map(post => (
               <PostCard 
                 key={post._id} 
                 post={post} 
@@ -124,7 +155,7 @@ function App() {
         </main>
 
         <aside className="sidebar" style={styles.sidebar}>
-          <div style={styles.sidebarCard}>
+          <div className="sidebar-card" style={styles.sidebarCard}>
             <div style={{
               height: '34px',
               backgroundColor: '#0079d3',
@@ -140,11 +171,11 @@ function App() {
             <button style={styles.sidebarBtn}>Join Community</button>
           </div>
 
-          <div style={styles.sidebarCard}>
+          <div className="sidebar-card" style={styles.sidebarCard}>
             <h3 style={{ fontSize: '14px', color: '#878a8c', marginBottom: '12px' }}>TRENDING COMMUNITIES</h3>
             <div style={styles.communityList}>
               {['tech', 'gaming', 'worldnews', 'movies', 'science'].map((name, i) => (
-                <div key={name} style={styles.communityItem}>
+                <div key={name} className="community-item" style={styles.communityItem} onClick={() => setSearchQuery(name)}>
                   <span>{i + 1}</span>
                   <div style={{ 
                     width: '24px', 
@@ -161,10 +192,10 @@ function App() {
                 </div>
               ))}
             </div>
-            <button style={{...styles.sidebarBtn, backgroundColor: '#edeff1', color: '#0079d3', marginTop: '15px'}}>View All</button>
+            <button style={{...styles.sidebarBtn, backgroundColor: '#edeff1', color: '#0079d3', marginTop: '15px'}} onClick={() => setSearchQuery('')}>Clear Filter</button>
           </div>
 
-          <div style={styles.sidebarCard}>
+          <div className="sidebar-card" style={styles.sidebarCard}>
             <h3 style={{ fontSize: '14px' }}>Rules</h3>
             <ul style={styles.rulesList}>
               <li>1. Be respectful to others</li>
@@ -196,18 +227,20 @@ const styles = {
     display: 'none' // Hidden on small screens, will be handled by CSS
   },
   sidebarCard: {
-    backgroundColor: 'white',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
+    backgroundColor: 'var(--card-bg)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '16px',
     padding: '12px',
-    marginBottom: '16px'
+    marginBottom: '16px',
+    boxShadow: '0 2px 10px var(--shadow)',
+    transition: 'all 0.3s ease'
   },
   stats: {
     display: 'flex',
     gap: '20px',
     fontSize: '14px',
     margin: '15px 0',
-    borderTop: '1px solid #eee',
+    borderTop: '1px solid var(--border-color)',
     paddingTop: '10px'
   },
   sidebarBtn: {
@@ -221,30 +254,35 @@ const styles = {
     cursor: 'pointer'
   },
   sortTabs: {
-    backgroundColor: 'white',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
+    backgroundColor: 'var(--card-bg)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '16px',
     padding: '10px',
     marginBottom: '15px',
     display: 'flex',
-    gap: '15px'
+    gap: '15px',
+    boxShadow: '0 2px 10px var(--shadow)',
+    transition: 'all 0.3s ease'
   },
   tabBtn: {
     background: 'none',
     border: 'none',
     fontWeight: 'bold',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '14px',
+    color: 'var(--text-color)'
   },
   searchInput: {
     width: '100%',
     padding: '8px 15px',
     paddingLeft: '35px',
     borderRadius: '20px',
-    border: '1px solid #edeff1',
-    backgroundColor: '#f6f7f8',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
     fontSize: '14px',
-    outline: 'none'
+    outline: 'none',
+    transition: 'all 0.3s ease'
   },
   communityList: {
     display: 'flex',
@@ -255,13 +293,15 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    borderBottom: '1px solid #f6f7f8',
-    paddingBottom: '8px'
+    borderBottom: '1px solid var(--border-color)',
+    paddingBottom: '8px',
+    color: 'var(--text-color)'
   },
   rulesList: {
     paddingLeft: '20px',
     fontSize: '13px',
-    lineHeight: '1.6'
+    lineHeight: '1.6',
+    color: 'var(--text-color)'
   }
 };
 

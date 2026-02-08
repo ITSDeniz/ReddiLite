@@ -82,11 +82,13 @@ function CreatePost({onPostCreated, currentUser}){
 
 const styles = {
   container: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--card-bg, rgba(255, 255, 255, 0.6))',
+    border: '1px solid var(--border-color, rgba(255, 255, 255, 0.3))',
     padding: '15px',
-    borderRadius: '4px',
+    borderRadius: '16px',
     marginBottom: '20px',
-    border: '1px solid #ccc'
+    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+    transition: 'all 0.3s ease'
   },
   form: {
     display: 'flex',
@@ -95,11 +97,12 @@ const styles = {
   },
   input: {
     padding: '10px',
-    borderRadius: '4px',
-    border: '1px solid #eee',
-    backgroundColor: '#f6f7f8',
-    color: '#1c1c1c',
-    fontFamily: 'inherit'
+    borderRadius: '8px',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--input-bg, rgba(255, 255, 255, 0.4))',
+    color: 'var(--text-color)',
+    fontFamily: 'inherit',
+    transition: 'all 0.3s ease'
   },
   button: {
     alignSelf: 'flex-end',

@@ -1,9 +1,34 @@
+:root {
+  --bg-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+  --text-color: #1c1c1c;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --nav-bg: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.5);
+  --shadow: rgba(0, 0, 0, 0.05);
+  --accent-color: #0079d3;
+}
+
+[data-theme='dark'] {
+  --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  --text-color: #f1f1f1;
+  --card-bg: rgba(26, 26, 46, 0.9);
+  --nav-bg: rgba(15, 15, 25, 0.8);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(0, 0, 0, 0.4);
+  --shadow: rgba(0, 0, 0, 0.4);
+  --accent-color: #4da3ff;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #dae0e6;
-  color: #1c1c1c; /* Default Reddit-like dark text color */
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .app-container {
@@ -16,19 +41,22 @@ body {
 
 .navbar {
   width: 100%;
-  background-color: white;
-  padding: 5px 0;
-  border-bottom: 1px solid #ccc;
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
   display: flex;
   justify-content: center;
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 .navbar-content {
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -41,16 +69,11 @@ body {
   font-size: 24px;
 }
 
-@media (min-width: 900px) {
-  .sidebar {
-    display: block !important;
-  }
-}
-
 .main-layout {
   width: 100%;
   display: flex;
   justify-content: center;
+  transition: all 0.3s ease;
 }
 
 .feed {
@@ -59,15 +82,105 @@ body {
   box-sizing: border-box;
 }
 
+/* Glass Cards */
+.post-card, .sidebar-card, .sort-tabs, .create-post-container {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 15px var(--shadow) !important;
+  transition: all 0.3s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--shadow) !important;
+  border-color: var(--accent-color) !important;
+}
+
+/* Inputs */
+input, textarea {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  transition: all 0.3s ease;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
+/* Sidebar Specifics */
+.community-item:hover {
+  background-color: var(--input-bg) !important;
+}
+
 .vote-btn {
   background: none;
   border: none;
   cursor: pointer;
   color: #878a8c;
   padding: 4px;
-  border-radius: 2px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
 }
 
 .vote-btn:hover {
-  background-color: #eee;
+  background-color: var(--input-bg);
+}
+
+/* Theme Toggle Switch */
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.theme-switch-label {
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.theme-switch-label:hover {
+  transform: scale(1.2);
+}
+
+.theme-switch-container {
+  width: 50px;
+  height: 26px;
+  background-color: var(--input-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.theme-switch-ball {
+  width: 20px;
+  height: 20px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  position: absolute;
+  left: 27px; /* Default for Light mode */
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+[data-theme='dark'] .theme-switch-ball {
+  left: 3px; /* Position for Dark mode */
+}
+
+.theme-switch-container:hover {
+  border-color: var(--accent-color);
+}
+
+@media (min-width: 900px) {
+  .sidebar {
+    display: block !important;
+  }
 }

@@ -156,7 +156,7 @@ function PostCard({ post, onVote }) {
         </button>
         <span className="score-text" style={{
           ...styles.score, 
-          color: isUpvoted ? '#ff4500' : (isDownvoted ? '#7193ff' : '#1c1c1c')
+          color: isUpvoted ? '#ff4500' : (isDownvoted ? '#7193ff' : 'var(--text-color)')
         }}>
           {score}
         </span>
@@ -188,7 +188,7 @@ function PostCard({ post, onVote }) {
             </div>
             r/{post.community || 'general'} • Posted by u/{post.author}
           </div>
-          {localStorage.getItem('userID') === post.userID && (
+            {token && localStorage.getItem('userID') === post.userID && (
             <button 
               onClick={handleDeletePost} 
               style={styles.deletePostBtn}
@@ -233,7 +233,7 @@ function PostCard({ post, onVote }) {
                   <div key={c._id} style={styles.comment}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <small><b>u/{c.author}</b></small>
-                      {localStorage.getItem('userID') === c.userID && (
+                      {token && localStorage.getItem('userID') === c.userID && (
                         <button 
                           onClick={() => handleDeleteComment(c._id)} 
                           style={styles.deleteCommentBtn}
@@ -273,18 +273,21 @@ function PostCard({ post, onVote }) {
 const styles = {
   card: {
     display: 'flex',
-    backgroundColor: 'white',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    marginBottom: '10px',
+    backgroundColor: 'var(--card-bg)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '16px',
+    marginBottom: '16px',
     overflow: 'hidden',
     textAlign: 'left',
     width: '100%',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    boxShadow: '0 2px 10px var(--shadow)',
+    transition: 'all 0.3s ease',
+    color: 'var(--text-color)'
   },
   voteSidebar: {
     width: '40px',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -301,7 +304,8 @@ const styles = {
   score: { 
     fontWeight: 'bold', 
     margin: '5px 0',
-    fontSize: '12px'
+    fontSize: '12px',
+    color: 'var(--text-color)'
   },
   content: {
     padding: '8px 12px',
@@ -317,12 +321,13 @@ const styles = {
     marginTop: '10px'
   },
   summaryBox: {
-    backgroundColor: '#f6f7f8',
+    backgroundColor: 'var(--input-bg)',
     padding: '10px',
     borderRadius: '4px',
     borderLeft: '4px solid #0079d3',
     marginTop: '8px',
-    marginBottom: '8px'
+    marginBottom: '8px',
+    color: 'var(--text-color)'
   },
   commentSection: {
     marginTop: '15px',
